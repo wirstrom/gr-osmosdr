@@ -43,6 +43,7 @@
 #include <SoapySDR/Device.hpp>
 #include <SoapySDR/Version.hpp>
 
+
 using namespace boost::assign;
 
 /*
@@ -94,6 +95,15 @@ int soapy_sink_c::work( int noutput_items,
                             gr_vector_void_star &output_items )
 {
     int flags = 0;
+    std::vector<gr::tag_t> tags;
+    get_tags_in_window(tags,0,0,noutput_items);
+//    std::cout << "TAGS:\n";
+    BOOST_FOREACH( gr::tag_t tag, tags) {
+//      std::cout << "\t"<< tags[0].key << "\n";
+      if (pmt::symbol_to_string(tag.key) == "tx_eob")
+        flags |= SOAPY_SDR_END_BURST;
+    }
+
     long long timeNs = 0;
     int ret = _device->writeStream(
         _stream, &input_items[0],
